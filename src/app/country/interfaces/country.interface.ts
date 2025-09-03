@@ -3,6 +3,7 @@ export interface Country {
   flag: string;
   flagSvg: string;
   name: string;
+  nameSpa: string;
   capital: string;
   population: number;
 }
