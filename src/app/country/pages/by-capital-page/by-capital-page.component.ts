@@ -4,7 +4,7 @@ import { SearchInputComponent } from '../../components/search-input/search-input
 import { CountryListComponent } from '../../components/country-list/country-list.component';
 import { CountryService } from '../../services/country.service';
 
-import { of } from 'rxjs';
+import { catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-by-capital-page',
@@ -21,9 +21,16 @@ export class ByCapitalPageComponent {
     params: () => ({ query: this.query() }),
 
     stream: ({ params }) => {
-      if (!params.query) return of([]);
+      // if (!params.query) return of([]);
 
-      return this.countryService.searchByCapital(params.query);
+      return this.countryService.searchByCapital(params.query).pipe(
+        catchError((err) => {
+          console.log('Error Error', err);
+
+          //to solve an issue with angular v20
+          return of([]);
+        })
+      );
     },
   });
 

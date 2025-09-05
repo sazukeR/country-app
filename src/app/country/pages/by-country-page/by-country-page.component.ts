@@ -1,7 +1,7 @@
 import { Component, inject, resource, signal } from '@angular/core';
 import { SearchInputComponent } from '../../components/search-input/search-input.component';
 import { CountryListComponent } from '../../components/country-list/country-list.component';
-import { of } from 'rxjs';
+import { catchError, of } from 'rxjs';
 import { CountryService } from '../../services/country.service';
 import { rxResource } from '@angular/core/rxjs-interop';
 
@@ -19,9 +19,16 @@ export class ByCountryPageComponent {
     params: () => ({ query: this.query() }),
 
     stream: ({ params }) => {
-      if (!params.query) return of([]);
+      //  if (!params.query) return of([]);
 
-      return this.countryService.searchByCountry(params.query);
+      return this.countryService.searchByCountry(params.query).pipe(
+        catchError((err) => {
+          console.log('Error Error', err);
+
+          //to solve an issue with angular v20
+          return of([]);
+        })
+      );
     },
   });
 
