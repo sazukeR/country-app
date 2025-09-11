@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { RESTCountry } from '../interfaces/rest-countries.interface';
-import { catchError, delay, map, throwError } from 'rxjs';
+import { catchError, delay, map, of, tap, throwError } from 'rxjs';
 import { CountryMapper } from '../mappers/country.mapper';
+import { Country } from '../interfaces/country.interface';
 
 const API_URL = 'https://restcountries.com/v3.1';
 
@@ -11,12 +12,21 @@ const API_URL = 'https://restcountries.com/v3.1';
 })
 export class CountryService {
   private http = inject(HttpClient);
+  private queryCacheCapital = new Map<string, Country[]>(); // Actually we could use a Record<> but in this case we rather to use Map() to handle de type for cache
+  private queryCacheCountry = new Map<string, Country[]>();
 
   searchByCapital(query: string) {
     query = query.toLowerCase();
 
+    if (this.queryCacheCapital.has(query)) {
+      return of(this.queryCacheCapital.get(query) ?? []);
+    }
+
+    console.log('I appear when the query gets to the server :)');
+
     return this.http.get<RESTCountry[]>(`${API_URL}/capital/${query}`).pipe(
       map((resp) => CountryMapper.restCountriesToCountries(resp)),
+      tap((countries) => this.queryCacheCapital.set(query, countries)), // we set the values of the query in an object
       catchError((err) => {
         console.log('Error Fetching', err);
         return throwError(() => new Error(`No se pudo encontrar capital por ${query}`));
@@ -27,9 +37,14 @@ export class CountryService {
   searchByCountry(query: string) {
     query = query.toLowerCase();
 
+    if (this.queryCacheCountry.has(query)) {
+      return of(this.queryCacheCountry.get(query) ?? []);
+    }
+
     return this.http.get<RESTCountry[]>(`${API_URL}/name/${query}`).pipe(
       map((resp) => CountryMapper.restCountriesToCountries(resp)),
-      delay(3000),
+      tap((countries) => this.queryCacheCountry.set(query, countries)),
+      // delay(3000),
       catchError((err) => {
         console.log('Error Fetching', err);
         return throwError(() => new Error(`No se pudo encontrar un pais por ${query}`));
