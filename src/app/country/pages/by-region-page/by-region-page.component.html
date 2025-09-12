@@ -1,2 +1,10 @@
+<!-- region options -->
+<app-region-options [regionOptions]="regions" (selectedRegion)="query.set($event)" />
+
 <!-- country-list -->
-<country-list [countryList]="[]" />
+<country-list
+  [countryList]="countryResource.value() ?? []"
+  [errorMessage]="countryResource.error()"
+  [isEmpty]="countryResource.value()?.length === 0"
+  [isLoading]="countryResource.isLoading()"
+/>

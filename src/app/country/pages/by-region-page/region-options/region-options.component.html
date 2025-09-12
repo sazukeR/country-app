@@ -1,0 +1,18 @@
+<nav class="p-4 w-full">
+  <ul class="menu bg-base-200 sm:menu-horizontal rounded-box">
+    @for (region of regionOptions(); track $index ; let index = $index) {
+
+    <li>
+      <button
+        class="btn btn-outline mr-2 w-[100px]"
+        (click)="onRegionSelected(region)"
+        routerLinkActive="btn-primary"
+        [class.btn-primary]="currentActiveRegion() === region"
+      >
+        {{ region }}
+      </button>
+    </li>
+
+    }
+  </ul>
+</nav>

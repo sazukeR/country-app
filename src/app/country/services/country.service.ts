@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { RESTCountry } from '../interfaces/rest-countries.interface';
 import { catchError, delay, map, of, tap, throwError } from 'rxjs';
 import { CountryMapper } from '../mappers/country.mapper';
-import { Country } from '../interfaces/country.interface';
+import { Country, Region } from '../interfaces/country.interface';
 
 const API_URL = 'https://restcountries.com/v3.1';
 
@@ -14,6 +14,8 @@ export class CountryService {
   private http = inject(HttpClient);
   private queryCacheCapital = new Map<string, Country[]>(); // Actually we could use a Record<> but in this case we rather to use Map() to handle de type for cache
   private queryCacheCountry = new Map<string, Country[]>();
+
+  private queryCacheRegion = new Map<Region, Country[]>();
 
   searchByCapital(query: string) {
     query = query.toLowerCase();
@@ -60,6 +62,23 @@ export class CountryService {
       catchError((err) => {
         console.log('Error Fetching', err);
         return throwError(() => new Error(`No se encontraron resultados ${code}`));
+      })
+    );
+  }
+
+  searchByRegion(region: Region) {
+    if (this.queryCacheRegion.has(region)) {
+      return of(this.queryCacheRegion.get(region) ?? []);
+    }
+
+    console.log('I appear when the query gets to the server :)');
+
+    return this.http.get<RESTCountry[]>(`${API_URL}/region/${region}`).pipe(
+      map((resp) => CountryMapper.restCountriesToCountries(resp)),
+      tap((countries) => this.queryCacheRegion.set(region, countries)), // we set the values of the query in an object
+      catchError((err) => {
+        console.log('Error Fetching', err);
+        return throwError(() => new Error(`No se pudo encontrar capital por ${region}`));
       })
     );
   }
