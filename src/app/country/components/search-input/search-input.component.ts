@@ -1,4 +1,4 @@
-import { Component, effect, input, output, signal } from '@angular/core';
+import { Component, effect, input, linkedSignal, output, signal } from '@angular/core';
 
 @Component({
   selector: 'country-search-input',
@@ -8,7 +8,10 @@ import { Component, effect, input, output, signal } from '@angular/core';
 export class SearchInputComponent {
   value = output<string>();
   placeholderValue = input<string>('Buscar');
-  inputValue = signal<string>('');
+
+  initialValue = input<string>();
+
+  inputValue = linkedSignal<string>(() => this.initialValue() ?? '');
 
   onSearch(value: string) {
     this.value.emit(value);
