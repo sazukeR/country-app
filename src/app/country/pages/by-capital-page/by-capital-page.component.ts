@@ -1,11 +1,11 @@
 import { rxResource } from '@angular/core/rxjs-interop';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, linkedSignal, signal } from '@angular/core';
 import { SearchInputComponent } from '../../components/search-input/search-input.component';
 import { CountryListComponent } from '../../components/country-list/country-list.component';
 import { CountryService } from '../../services/country.service';
 
 import { catchError, of } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-by-capital-page',
@@ -15,10 +15,12 @@ import { ActivatedRoute } from '@angular/router';
 export class ByCapitalPageComponent {
   countryService = inject(CountryService);
 
+  router = inject(Router);
+
   activatedRoute = inject(ActivatedRoute);
   queryParam = this.activatedRoute.snapshot.queryParamMap.get('query') ?? '';
 
-  query = signal(this.queryParam);
+  query = linkedSignal(() => this.queryParam);
 
   // WITH OBSERVABLES (BETTER)
 
@@ -26,7 +28,13 @@ export class ByCapitalPageComponent {
     params: () => ({ query: this.query() }),
 
     stream: ({ params }) => {
-      // if (!params.query) return of([]);
+      if (!params.query) return of([]);
+
+      this.router.navigate(['/country/by-capital'], {
+        queryParams: {
+          query: params.query,
+        },
+      });
 
       return this.countryService.searchByCapital(params.query).pipe(
         catchError((err) => {

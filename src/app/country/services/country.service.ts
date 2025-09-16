@@ -12,7 +12,7 @@ const API_URL = 'https://restcountries.com/v3.1';
 })
 export class CountryService {
   private http = inject(HttpClient);
-  private queryCacheCapital = new Map<string, Country[]>(); // Actually we could use a Record<> but in this case we rather to use Map() to handle de type for cache
+  private queryCacheCapital = new Map<string, Country[]>(); // Actually we could use a Record<> but in this case we rather to use Map() to handle the type for cache
   private queryCacheCountry = new Map<string, Country[]>();
 
   private queryCacheRegion = new Map<Region, Country[]>();
